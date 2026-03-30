@@ -26,3 +26,7 @@
 - `data-structure`：数据结构学习记录
 - `algorithm-notes`：算法题思路与复盘
 - `daily-log`：每日学习日志
+
+## 当前重点项目
+
+- `c-basics/pointer-lab-project`：把指针、数组、结构体、二级指针整合成一个可运行项目
