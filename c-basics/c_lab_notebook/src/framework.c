@@ -5,6 +5,14 @@
 
 #include "../include/notebook.h"
 
+static int read_line_file(FILE *fp, char *buf, int max_len) {
+    if (fgets(buf, max_len, fp) == NULL) {
+        return 0;
+    }
+    buf[strcspn(buf, "\r\n")] = '\0';
+    return 1;
+}
+
 void nb_init(Notebook *nb) {
     nb->size = 0;
     nb->capacity = 4;
@@ -146,10 +154,15 @@ void nb_load_from_file(Notebook *nb, const char *path) {
             printf("历史文件中断，忽略加载。\n");
             return;
         }
-        read_line(r->topic, NB_TOPIC_MAX);
-        read_line(r->title, NB_TITLE_MAX);
-        read_line(r->note, NB_NOTE_MAX);
-        read_line(r->created_at, NB_TIME_MAX);
+        if (!read_line_file(fp, r->topic, NB_TOPIC_MAX) ||
+            !read_line_file(fp, r->title, NB_TITLE_MAX) ||
+            !read_line_file(fp, r->note, NB_NOTE_MAX) ||
+            !read_line_file(fp, r->created_at, NB_TIME_MAX)) {
+            free(new_items);
+            fclose(fp);
+            printf("历史文件中断，忽略加载。\n");
+            return;
+        }
     }
 
     free(nb->items);

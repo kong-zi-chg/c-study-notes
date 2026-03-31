@@ -5,40 +5,77 @@
 #include "../include/notebook.h"
 
 int nb_add_record(Notebook *nb, const char *topic, const char *title, const char *note) {
-    // TODO(你来实现):
-    // 1) 如果 size == capacity，做扩容（建议 *2）
-    // 2) 填充新记录：id / topic / title / note / created_at
-    // 3) size++，next_id++
-    // 4) 成功返回 0，失败返回 -1
+    if (nb == NULL || topic == NULL || title == NULL || note == NULL) {
+        return -1;
+    }
 
-    (void)nb;
-    (void)topic;
-    (void)title;
-    (void)note;
-    return -1;
+    if (nb->size >= nb->capacity) {
+        int new_capacity = (nb->capacity > 0) ? nb->capacity * 2 : 4;
+        NoteRecord *new_items = (NoteRecord *)realloc(
+            nb->items,
+            sizeof(NoteRecord) * new_capacity
+        );
+        if (new_items == NULL) {
+            return -1;
+        }
+        nb->items = new_items;
+        nb->capacity = new_capacity;
+    }
+
+    NoteRecord *r = &nb->items[nb->size];
+
+    r->id = nb->next_id;
+    snprintf(r->topic, NB_TOPIC_MAX, "%s", topic);
+    snprintf(r->title, NB_TITLE_MAX, "%s", title);
+    snprintf(r->note, NB_NOTE_MAX, "%s", note);
+    now_time(r->created_at, NB_TIME_MAX);
+
+    nb->size++;
+    nb->next_id++;
+    return 0;
 }
 
 int nb_delete_by_id(Notebook *nb, int id) {
-    // TODO(你来实现):
-    // 1) 找到 id 对应下标
-    // 2) 之后元素整体前移一位
-    // 3) size--
-    // 4) 找到返回 0，没找到返回 -1
+    if (nb == NULL || nb->size == 0) {
+        return -1;
+    }
 
-    (void)nb;
-    (void)id;
-    return -1;
+    int idx = -1;
+    for (int i = 0; i < nb->size; i++) {
+        if (nb->items[i].id == id) {
+            idx = i;
+            break;
+        }
+    }
+
+    if (idx == -1) {
+        return -1;
+    }
+
+    for (int i = idx; i < nb->size - 1; i++) {
+        nb->items[i] = nb->items[i + 1];
+    }
+    nb->size--;
+    return 0;
 }
 
 int nb_find_by_keyword(const Notebook *nb, const char *keyword) {
-    // TODO(你来实现):
-    // 1) 在 title 或 note 中做包含匹配（strstr）
-    // 2) 每命中一条就打印该记录简要信息
-    // 3) 返回命中数量
+    if (nb == NULL || keyword == NULL || keyword[0] == '\0') {
+        return 0;
+    }
 
-    (void)nb;
-    (void)keyword;
-    return 0;
+    int count = 0;
+    for (int i = 0; i < nb->size; i++) {
+        const NoteRecord *r = &nb->items[i];
+        if (strstr(r->title, keyword) != NULL || strstr(r->note, keyword) != NULL) {
+            printf("ID:%d | [%s] %s\n", r->id, r->topic, r->title);
+            printf("时间:%s\n", r->created_at);
+            printf("内容:%s\n", r->note);
+            printf("--------------------------\n");
+            count++;
+        }
+    }
+    return count;
 }
 
 static int cmp_record_id(const void *a, const void *b) {
@@ -50,10 +87,8 @@ static int cmp_record_id(const void *a, const void *b) {
 }
 
 void nb_sort_by_id(Notebook *nb) {
-    // TODO(你来实现):
-    // 用 qsort 对 nb->items 按 id 升序排序
-    // 提示: qsort(base, nitems, size, cmp)
-
-    (void)cmp_record_id; // 去掉你实现前的未使用警告
-    (void)nb;
+    if (nb == NULL || nb->size <= 1) {
+        return;
+    }
+    qsort(nb->items, nb->size, sizeof(NoteRecord), cmp_record_id);
 }
