@@ -30,3 +30,4 @@
 ## 当前重点项目
 
 - `c-basics/pointer-lab-project`：把指针、数组、结构体、二级指针整合成一个可运行项目
+- `c-basics/c_lab_notebook`：错题/知识点记录工具（你实现核心，我负责框架）
